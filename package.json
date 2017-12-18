@@ -1,0 +1,22 @@
+{
+  "name": "sls_hula_wss",
+  "version": "1.0.0",
+  "description": "server less hula source code",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.149.0",
+    "aws-signature-v4": "^1.1.0",
+    "crypto": "^1.0.1",
+    "mysql": "^2.15.0"
+  },
+  "devDependencies": {
+    "serverless-domain-manager": "^1.1.20",
+    "serverless-offline": "^3.16.0",
+    "serverless-secrets-plugin": "^0.1.0"
+  }
+}
