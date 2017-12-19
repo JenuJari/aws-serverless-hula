@@ -1,0 +1,7 @@
+handler: src/notifyDisconnect.handler
+events:
+  - iot:
+      sql: "SELECT * FROM 'last-will'"
+environment:
+  IOT_AWS_REGION: ${self:custom.secrets.IOT_AWS_REGION}
+  IOT_ENDPOINT_HOST: ${self:custom.secrets.IOT_ENDPOINT_HOST}

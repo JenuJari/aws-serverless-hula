@@ -1,0 +1,19 @@
+hello:
+  handler: handler.hello
+  events:
+    - http:
+        method: GET
+        path: /
+        cors: true
+
+authorizerFunc: ${file(functions_config/handler/auth.yml)}
+
+secure: ${file(functions_config/handler/secure.yml)}
+
+notifyDisconnect: ${file(functions_config/notifyDisconnect/index.yml)}
+
+notifyProductClaimed : ${file(functions_config/hulaApi/sale/PublishClaimedEvent.yml)}
+
+notifyGeneric : ${file(functions_config/notifyDisconnect/genericEndPoint.yml)}
+
+iotPresignedUrl: ${file(functions_config/iotPresignedUrl/index.yml)}

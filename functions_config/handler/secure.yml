@@ -1,0 +1,12 @@
+handler: handler.secure
+events:
+  - http: OPTIONS /secure
+  - http:
+      method: GET
+      path: /secure
+      cors: true
+      authorizer:
+        name: authorizerFunc
+        resultTtlInSeconds: 0
+        identitySource: method.request.header.Authorization
+        type: token

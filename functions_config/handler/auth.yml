@@ -1,0 +1,14 @@
+handler: handler.auth
+vpc:
+  securityGroupIds:
+    - ${self:custom.secrets.RDS_SECURITY_GROUP_ID}
+  subnetIds:
+    - ${self:custom.secrets.RDS_SUBNET_1}
+    - ${self:custom.secrets.RDS_SUBNET_2}
+    - ${self:custom.secrets.RDS_SUBNET_3}
+    - ${self:custom.secrets.RDS_SUBNET_4}
+environment:
+  MYSQL_HOST: ${self:custom.secrets.MYSQL_HOST}
+  MYSQL_USER: ${self:custom.secrets.MYSQL_USER}
+  MYSQL_PASSWORD: ${self:custom.secrets.MYSQL_PASSWORD}
+  MYSQL_DATABASE: ${self:custom.secrets.MYSQL_DATABASE}

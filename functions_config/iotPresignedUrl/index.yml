@@ -1,0 +1,17 @@
+handler: src/iotPresignedUrl.handler
+events:
+  - http: OPTIONS /iot-presigned-url
+  - http:
+      method: GET
+      path: /iot-presigned-url
+      cors: true
+      authorizer:
+        name: authorizerFunc
+        resultTtlInSeconds: 0
+        identitySource: method.request.header.Authorization
+        type: token
+environment:
+  IOT_AWS_REGION: ${self:custom.secrets.IOT_AWS_REGION}
+  IOT_ENDPOINT_HOST: ${self:custom.secrets.IOT_ENDPOINT_HOST}
+  IOT_ACCESS_KEY: ${self:custom.secrets.IOT_ACCESS_KEY}
+  IOT_SECRET_KEY: ${self:custom.secrets.IOT_SECRET_KEY}

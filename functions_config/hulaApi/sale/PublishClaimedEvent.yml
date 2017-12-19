@@ -1,0 +1,15 @@
+handler : src/hulaApi/controllers/sale.PublishClaimedEvent
+events:
+  - http: OPTIONS /api/sale/product-claimed
+  - http:
+      method: POST
+      path: /api/sale/product-claimed
+      cors: true
+      authorizer:
+        name: authorizerFunc
+        resultTtlInSeconds: 0
+        identitySource: method.request.header.Authorization
+        type: token
+environment:
+  IOT_AWS_REGION: ${self:custom.secrets.IOT_AWS_REGION}
+  IOT_ENDPOINT_HOST: ${self:custom.secrets.IOT_ENDPOINT_HOST}
