@@ -1,6 +1,7 @@
 'use strict';
 
 const mysql = require('mysql');
+// const Redis = require('ioredis');
 
 let localEnv = null;
 
@@ -33,7 +34,16 @@ var generatePolicy = function(principalId, effect, resource) {
     //     "booleanKey": true
     // };
     return authResponse;
-}
+};
+
+var policyDecider = function (ourToken, receivedToken, e, callback) {
+    if (ourToken == receivedToken) {
+        const policy = generatePolicy('' + (new Date()).getTime(), 'Allow', e.methodArn);
+        return callback(null, policy);
+    } else {
+        return callback('Unauthorized');
+    }
+};
 
 module.exports.hello = (event, context, callback) => {
     const response = {
@@ -53,10 +63,24 @@ module.exports.auth = (event, context, callback) => {
 
     context.callbackWaitsForEmptyEventLoop = false;
 
-    var db_host = process.env.IS_OFFLINE == 'true'  && !!localEnv ? localEnv.mysql.host : process.env.MYSQL_HOST;
-    var db_user = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.user : process.env.MYSQL_USER;
-    var db_password = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.password : process.env.MYSQL_PASSWORD;
-    var db_database = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.database : process.env.MYSQL_DATABASE;
+    const db_host = process.env.IS_OFFLINE == 'true'  && !!localEnv ? localEnv.mysql.host : process.env.MYSQL_HOST;
+    const db_user = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.user : process.env.MYSQL_USER;
+    const db_password = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.password : process.env.MYSQL_PASSWORD;
+    const db_database = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.mysql.database : process.env.MYSQL_DATABASE;
+
+    // const redis_host = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.redis.host : process.env.REDIS_HOST;
+    // const redis_user = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.redis.user : process.env.REDIS_USER;
+    // const redis_pass = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.redis.passowrd : process.env.REDIS_PASSWORD;
+    // const redis_port = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.redis.port : process.env.REDIS_PORT;
+    // const redis_dbc = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.redis.db : process.env.REDIS_DBC;
+    // const redis_stage = process.env.IS_OFFLINE == 'true' && !!localEnv ? localEnv.stage : process.env.STAGE;
+
+
+    var sentAuth = '';
+    if (event.hasOwnProperty('authorizationToken')) sentAuth = event.authorizationToken;
+    if (sentAuth == '' && event.hasOwnProperty('headers')
+        && event.headers.hasOwnProperty('Authorization'))
+        sentAuth = event.headers.Authorization;
 
     const connection = mysql.createConnection({
         host: db_host,
@@ -65,33 +89,36 @@ module.exports.auth = (event, context, callback) => {
         database: db_database
     });
 
-    connection.connect();
+    //const rclient = new Redis('redis://' + redis_user + ':' + redis_pass + '@' + redis_host + ':' + redis_port + '/' + redis_dbc);
+    //const API_KEY = redis_stage + '.API_KEY';
 
-    connection.query("SELECT * from l_api_token where Name = 'API_KEY';", function(error, results, fields) {
-        if (error) {
-            const errorMesage = error.sqlMessage;
-            const response = {
-                statusCode: 500,
-                body: JSON.stringify({
-                    errorMesage
-                })
-            };
-            callback(null, response);
-        }
-        const API_KEY_RECORD = results[0];
+    //rclient.get(API_KEY, function (err, key) {
+    //    if (!key) {
+            connection.connect();
+            connection.query("SELECT * from l_api_token where Name = 'API_KEY';", function (error, query_result, fields) {
+                if (error) {
+                    const errorMesage = error.sqlMessage;
+                    const response = {
+                        statusCode: 500,
+                        body: JSON.stringify({
+                            errorMesage
+                        })
+                    };
+                    callback(null, response);
+                }
 
-        var sentAuth = '';
-        if(event.hasOwnProperty('authorizationToken')) sentAuth = event.authorizationToken;
-        if(sentAuth == '' && event.hasOwnProperty('headers') && event.headers.hasOwnProperty('Authorization'))
-            sentAuth = event.headers.Authorization;
+                const API_KEY_RECORD = query_result[0];
+                //rclient.set(API_KEY, API_KEY_RECORD.token, 'EX', 21600);
 
-        if (API_KEY_RECORD.token == sentAuth) {
-            const policy = generatePolicy('' + (new Date()).getTime(), 'Allow', event.methodArn);
-            return callback(null , policy );
-        } else {
-            return callback('Unauthorized');
-        }
-    });
+                connection.end();
+                //rclient.quit();
+                return policyDecider(API_KEY_RECORD.token,sentAuth,event,callback);
+            });
+    //    } else {
+    //        rclient.quit();
+    //        return policyDecider(key, sentAuth, event, callback);
+    //    }
+    // });
 };
 module.exports.secure = (event,context,callback) => {
     const response = {

@@ -7,4 +7,5 @@ yarn.lock
 .serverless
 /secrets.dev.yml
 /secrets.gohula.yml
+/secrets.dsgohula.yml
 /secrets.lularoe.yml
