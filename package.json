@@ -4,7 +4,8 @@
   "description": "server less hula source code",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "runlocal": "sls offline --port 7878 start"
   },
   "author": "",
   "license": "ISC",
@@ -12,9 +13,11 @@
     "aws-sdk": "^2.149.0",
     "aws-signature-v4": "^1.1.0",
     "crypto": "^1.0.1",
+    "deferred": "^0.7.9",
     "mysql": "^2.15.0"
   },
   "devDependencies": {
+    "serverless": "^1.26.1",
     "serverless-domain-manager": "^1.1.20",
     "serverless-offline": "^3.16.0",
     "serverless-secrets-plugin": "^0.1.0"
