@@ -3,6 +3,8 @@ node_modules
 jspm_packages
 yarn.lock
 
+
+local.js
 # Serverless directories
 .serverless
 /secrets.dev.yml
